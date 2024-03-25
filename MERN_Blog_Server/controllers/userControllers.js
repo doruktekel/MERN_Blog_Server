@@ -36,5 +36,16 @@ const login = async (req, res) => {
     return res.status(400).json({ message: `Wrong credintials` });
   }
 };
+const logged = (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, (err, info) => {
+    if (err) throw err;
+    res.json(info);
+  });
+};
 
-export { register, login };
+const logout = (req, res) => {
+  res.cookie("token", "").json("ok");
+};
+
+export { register, login, logged, logout };
