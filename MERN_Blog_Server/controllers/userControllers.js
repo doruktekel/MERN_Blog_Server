@@ -1,6 +1,8 @@
 import UserModel from "../models/userModels.js";
+import PostModel from "../models/postModels.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import fs from "fs";
 
 const secret = "oimnadsijopqewijo23r90-2r3jko9-fmopl";
 
@@ -51,4 +53,22 @@ const logout = (req, res) => {
   res.cookie("token", "").json("ok");
 };
 
-export { register, login, logged, logout };
+const createPost = async (req, res) => {
+  const { originalname, path } = req.file;
+  const parts = originalname.split(".");
+  const ext = parts[parts.length - 1];
+  const newPath = path + "." + ext;
+  fs.renameSync(path, newPath);
+
+  const { title, summary, content } = req.body;
+  const post = await PostModel.create({
+    title,
+    summary,
+    content,
+    cover: newPath,
+  });
+
+  res.json(post);
+};
+
+export { register, login, logged, logout, createPost };

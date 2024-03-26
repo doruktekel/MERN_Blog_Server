@@ -5,11 +5,16 @@ import {
   login,
   logged,
   logout,
+  createPost,
 } from "../controllers/userControllers.js";
+import multer from "multer";
+
+const upload = multer({ dest: "uploads/" });
 
 router.post("/register", register);
 router.post("/login", login);
 router.get("/profile", logged);
 router.post("/logout", logout);
+router.post("/post", upload.single("file"), createPost);
 
 export default router;
