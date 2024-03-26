@@ -30,7 +30,10 @@ const login = async (req, res) => {
       if (err) {
         throw err;
       }
-      res.cookie("token", token).json("ok");
+      res.cookie("token", token).json({
+        username,
+        id: user._id,
+      });
     });
   } else {
     return res.status(400).json({ message: `Wrong credintials` });
