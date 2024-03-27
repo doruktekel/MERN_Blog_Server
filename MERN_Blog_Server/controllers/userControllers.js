@@ -41,6 +41,7 @@ const login = async (req, res) => {
     return res.status(400).json({ message: `Wrong credintials` });
   }
 };
+
 const logged = (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, secret, {}, (err, info) => {
@@ -60,15 +61,27 @@ const createPost = async (req, res) => {
   const newPath = path + "." + ext;
   fs.renameSync(path, newPath);
 
-  const { title, summary, content } = req.body;
-  const post = await PostModel.create({
-    title,
-    summary,
-    content,
-    cover: newPath,
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { title, summary, content } = req.body;
+    const post = await PostModel.create({
+      title,
+      summary,
+      content,
+      cover: newPath,
+      author: info.id,
+    });
+    res.json(post);
   });
-
-  res.json(post);
 };
 
-export { register, login, logged, logout, createPost };
+const getPosts = async (req, res) => {
+  const posts = await PostModel.find()
+    .populate("author", ["username"])
+    .sort({ createdAt: -1 })
+    .limit(20);
+  res.json(posts);
+};
+
+export { register, login, logged, logout, createPost, getPosts };

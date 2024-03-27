@@ -6,6 +6,7 @@ import {
   logged,
   logout,
   createPost,
+  getPosts,
 } from "../controllers/userControllers.js";
 import multer from "multer";
 
@@ -16,5 +17,6 @@ router.post("/login", login);
 router.get("/profile", logged);
 router.post("/logout", logout);
 router.post("/post", upload.single("file"), createPost);
+router.get("/post", getPosts);
 
 export default router;
