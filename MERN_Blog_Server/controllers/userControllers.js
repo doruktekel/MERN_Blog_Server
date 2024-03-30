@@ -76,6 +76,35 @@ const createPost = async (req, res) => {
   });
 };
 
+const updatePost = async (req, res) => {
+  let newPath = null;
+  if (req.file) {
+    const { originalname, path } = req.file;
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    newPath = path + "." + ext;
+    fs.renameSync(path, newPath);
+  }
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { id, title, summary, content } = req.body;
+    const post = await PostModel.findById(id);
+    const isAuthor = JSON.stringify(post.author) === JSON.stringify(info.id);
+    if (!isAuthor) {
+      return res.status(400).json("You are not the author");
+    }
+    await PostModel.findByIdAndUpdate(id, {
+      title,
+      summary,
+      content,
+      cover: newPath ? newPath : post.cover,
+    });
+
+    res.json(post);
+  });
+};
+
 const getPosts = async (req, res) => {
   const posts = await PostModel.find()
     .populate("author", ["username"])
@@ -84,4 +113,19 @@ const getPosts = async (req, res) => {
   res.json(posts);
 };
 
-export { register, login, logged, logout, createPost, getPosts };
+const getById = async (req, res) => {
+  const { id } = req.params;
+  const post = await PostModel.findById(id).populate("author", ["username"]);
+  res.json(post);
+};
+
+export {
+  register,
+  login,
+  logged,
+  logout,
+  createPost,
+  getPosts,
+  getById,
+  updatePost,
+};
